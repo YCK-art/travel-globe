@@ -32,8 +32,17 @@ export default function TravelAddBar({ onAdd, countryList, compact = false }: Tr
       ).slice(0, 8)
     : [];
 
-  const start = range[0].startDate ? range[0].startDate.toISOString().slice(0, 10) : "";
-  const end = range[0].endDate ? range[0].endDate.toISOString().slice(0, 10) : "";
+  // 날짜 포맷 함수 (UTC 문제 방지)
+  function formatDate(date: Date|null) {
+    if (!date) return "";
+    const y = date.getFullYear();
+    const m = (date.getMonth()+1).toString().padStart(2,'0');
+    const d = date.getDate().toString().padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+
+  const start = range[0].startDate ? formatDate(range[0].startDate) : "";
+  const end = range[0].endDate ? formatDate(range[0].endDate) : "";
 
   return (
     <div className={`bg-white rounded-full shadow-lg ${compact ? "px-4 py-2 w-[400px] h-12" : "px-8 py-4 w-full max-w-5xl"} flex items-center gap-2 transition-all duration-300`}>
@@ -76,11 +85,14 @@ export default function TravelAddBar({ onAdd, countryList, compact = false }: Tr
         <div className="flex items-center gap-2">
           <button
             className="outline-none bg-transparent text-gray-700 text-base placeholder:text-gray-400 text-left border-b border-gray-200 py-1"
-            onClick={() => setShowCalendar(v => !v)}
+            onClick={() => {
+              setRange([{ startDate: null, endDate: null, key: "selection" }]);
+              setShowCalendar(v => !v);
+            }}
             type="button"
             style={compact ? {height: 32, fontSize: 15, padding: 0, border: 0} : {}}
           >
-            {start ? start : "출국일 선택"}
+            {start ? start : "날짜 선택"}
           </button>
           {start && !compact && (
             <button
@@ -95,25 +107,33 @@ export default function TravelAddBar({ onAdd, countryList, compact = false }: Tr
           )}
         </div>
         {showCalendar && !compact && (
-          <div className="absolute top-14 left-0 z-50">
+          <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-5xl bg-white rounded-2xl shadow-xl p-8 flex flex-col justify-between animate-fadeIn">
             <DateRange
               editableDateInputs={true}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChange={(item: any) => setRange([item.selection])}
               moveRangeOnFirstSelection={false}
-              ranges={range}
+              ranges={[{
+                startDate: range[0].startDate,
+                endDate: range[0].endDate,
+                key: "selection",
+                color: "#F57C00"
+              }]}
               locale={ko}
               months={2}
               direction="horizontal"
               showMonthAndYearPickers={false}
-              rangeColors={["#ec4899"]}
+              rangeColors={["#F57C00"]}
               staticRanges={[]}
               inputRanges={[]}
             />
-            <div className="flex justify-end mt-2">
+            <div className="flex justify-end pt-4">
               <button
-                className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-600 transition"
-                onClick={() => setShowCalendar(false)}
+                className="bg-[#F57C00] text-white px-4 py-2 rounded-lg shadow hover:bg-[#ff9800] transition"
+                onClick={() => {
+                  if (country && start && end) onAdd(country, start, end);
+                  setShowCalendar(false);
+                }}
                 type="button"
               >
                 적용
@@ -128,11 +148,14 @@ export default function TravelAddBar({ onAdd, countryList, compact = false }: Tr
         <div className="flex items-center gap-2">
           <button
             className="outline-none bg-transparent text-gray-700 text-base placeholder:text-gray-400 text-left border-b border-gray-200 py-1"
-            onClick={() => setShowCalendar(v => !v)}
+            onClick={() => {
+              setRange([{ startDate: null, endDate: null, key: "selection" }]);
+              setShowCalendar(v => !v);
+            }}
             type="button"
             style={compact ? {height: 32, fontSize: 15, padding: 0, border: 0} : {}}
           >
-            {end ? end : "귀국일 선택"}
+            {end ? end : "날짜 선택"}
           </button>
           {end && !compact && (
             <button

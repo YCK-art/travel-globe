@@ -5,6 +5,7 @@ declare module 'react-date-range' {
     startDate: Date | null;
     endDate: Date | null;
     key: string;
+    color?: string;
   }
 
   export interface DateRangeProps {
