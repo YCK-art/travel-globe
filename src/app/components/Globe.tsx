@@ -14,11 +14,16 @@ type Feature = {
   properties: {
     ADMIN?: string;
     name?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 };
 
 export default function GlobeComponent({ visited = [], fullScreen = false }: { visited?: Visited[], fullScreen?: boolean }) {
+  // SSR 환경에서는 아무것도 렌더하지 않음
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   function GlobeWithCountries({ visited }: { visited: Visited[] }) {
     const globeRef = useRef<object | null>(null);
     const [ready, setReady] = useState(false);

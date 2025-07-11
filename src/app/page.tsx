@@ -1,9 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Toolbar from "./components/Toolbar";
-import Globe from "./components/Globe";
 import TravelAddBar from "./components/TravelAddBar";
 import React from "react";
+
+// Globe 컴포넌트를 동적 import로 변경 (SSR 비활성화)
+const Globe = dynamic(() => import("./components/Globe"), { ssr: false });
 
 type Feature = { properties: { ADMIN?: string; name?: string } };
 
