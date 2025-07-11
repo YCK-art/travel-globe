@@ -14,8 +14,10 @@ export default function Home() {
   React.useEffect(() => {
     fetch("/countries-110m.geojson")
       .then(res => res.json())
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then(data => {
         if (data.features && Array.isArray(data.features)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const names = data.features.map((f: any) => f.properties.ADMIN || f.properties.name).filter(Boolean);
           setCountryList(Array.from(new Set(names)));
         }

@@ -55,7 +55,7 @@ export default function TravelAddBar({ onAdd, countryList, compact = false }: Tr
         />
         {showDropdown && filtered.length > 0 && !compact && (
           <ul className="absolute top-14 left-0 w-full bg-white border border-gray-200 rounded-lg shadow max-h-56 overflow-auto z-50">
-            {filtered.map((c, i) => (
+            {filtered.map((c) => (
               <li
                 key={c}
                 className="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-700"
@@ -98,6 +98,7 @@ export default function TravelAddBar({ onAdd, countryList, compact = false }: Tr
           <div className="absolute top-14 left-0 z-50">
             <DateRange
               editableDateInputs={true}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChange={(item: any) => setRange([item.selection])}
               moveRangeOnFirstSelection={false}
               ranges={range}

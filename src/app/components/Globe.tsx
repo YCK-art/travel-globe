@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import * as THREE from "three";
 
 interface Visited {
   country: string;
@@ -12,11 +11,13 @@ interface Visited {
 
 export default function GlobeComponent({ visited = [], fullScreen = false }: { visited?: Visited[], fullScreen?: boolean }) {
   function GlobeWithCountries({ visited }: { visited: Visited[] }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const globeRef = useRef<any>(null);
     const [ready, setReady] = useState(false);
 
     useEffect(() => {
       let isMounted = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let globeInstance: any;
       const load = async () => {
         try {
@@ -66,7 +67,8 @@ export default function GlobeComponent({ visited = [], fullScreen = false }: { v
     }, [visited]);
 
     return ready && globeRef.current ? (
-      <primitive object={globeRef.current} />
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      <primitive object={globeRef.current as any} />
     ) : null;
   }
 
