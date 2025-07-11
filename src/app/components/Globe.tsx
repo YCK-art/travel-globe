@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import Globe from "three-globe";
 
 interface Visited {
   country: string;
@@ -24,10 +25,9 @@ export default function GlobeComponent({ visited = [], fullScreen = false }: { v
 
     useEffect(() => {
       let isMounted = true;
-      let globeInstance: object | null = null;
+      let globeInstance: Globe;
       const load = async () => {
         try {
-          const { default: Globe } = await import("three-globe");
           globeInstance = new Globe();
           try {
             globeInstance.globeImageUrl("/earth-dark.jpg");
