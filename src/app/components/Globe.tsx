@@ -24,7 +24,7 @@ export default function GlobeComponent({ visited = [], fullScreen = false }: { v
 
     useEffect(() => {
       let isMounted = true;
-      let globeInstance: any;
+      let globeInstance: object | null = null;
       const load = async () => {
         try {
           const { default: Globe } = await import("three-globe");
