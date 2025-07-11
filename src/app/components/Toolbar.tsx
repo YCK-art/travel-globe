@@ -13,7 +13,7 @@ interface ToolbarProps {
 export default function Toolbar({ children, compact = false }: ToolbarProps) {
   const [langModalOpen, setLangModalOpen] = React.useState(false);
   const [loginModalOpen, setLoginModalOpen] = React.useState(false);
-  const [user, setUser] = React.useState<any>(null);
+  const [user, setUser] = React.useState<{ uid: string; email: string | null; displayName: string | null; photoURL: string | null; providerId: string } | null>(null);
   const [showProfileMenu, setShowProfileMenu] = React.useState(false);
   // 메뉴 바깥 클릭 시 닫기
   React.useEffect(() => {

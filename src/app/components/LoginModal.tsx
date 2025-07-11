@@ -21,7 +21,7 @@ export function getProfileInitial(user: { displayName?: string|null; email?: str
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
-  onLogin?: (user: any) => void;
+  onLogin?: (user: { uid: string; email: string | null; displayName: string | null; photoURL: string | null; providerId: string }) => void;
 }
 
 export default function LoginModal({ open, onClose, onLogin }: LoginModalProps) {
