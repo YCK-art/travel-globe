@@ -67,8 +67,7 @@ export default function GlobeComponent({ visited = [], fullScreen = false }: { v
     }, [visited]);
 
     return ready && globeRef.current ? (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      <primitive object={globeRef.current as any} />
+      <primitive object={globeRef.current as object} />
     ) : null;
   }
 
