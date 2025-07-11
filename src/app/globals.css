@@ -24,3 +24,113 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* react-date-range: 기간 선택 중 preview 하이라이트 숨기기 */
+.rdrDayInPreview {
+  background: transparent !important;
+}
+
+/* === react-date-range 커스텀 === */
+.rdrCalendarWrapper .rdrMonthAndYearPickers select,
+.rdrCalendarWrapper .rdrNextButton, .rdrCalendarWrapper .rdrPprevButton {
+  color: #F57C00 !important;
+}
+.rdrDayNumber span {
+  color: #222 !important;
+  font-weight: 500;
+}
+.rdrDayToday .rdrDayNumber span {
+  border-bottom: 2px solid #F57C00 !important;
+}
+.rdrDaySelected, .rdrDayStartPreview, .rdrDayEndPreview {
+  background: none !important;
+}
+.rdrDayStartOfRange .rdrDayNumber span,
+.rdrDayEndOfRange .rdrDayNumber span {
+  background: #F57C00 !important;
+  color: #fff !important;
+  border-radius: 50% !important;
+  padding: 0.2em 0.5em !important;
+}
+.rdrDayInRange:not(.rdrDayStartOfRange):not(.rdrDayEndOfRange) .rdrDayNumber span {
+  background: #ffe0c2 !important;
+  color: #222 !important;
+  border-radius: 0 !important;
+}
+.rdrDayPassive .rdrDayNumber span {
+  color: #ccc !important;
+}
+.rdrMonthAndYearPickers select:focus {
+  border-color: #F57C00 !important;
+}
+.rdrDateDisplayItemActive {
+  border: 1.5px solid #F57C00 !important;
+}
+.rdrDefinedRangesWrapper .rdrStaticRangeSelected {
+  background: #F57C00 !important;
+  color: #fff !important;
+}
+.rdrCalendarWrapper .rdrMonthAndYearPickers select {
+  border-radius: 6px;
+  border: 1px solid #eee;
+  padding: 2px 8px;
+}
+.rdrCalendarWrapper .rdrNextButton, .rdrCalendarWrapper .rdrPprevButton {
+  background: none !important;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rdrCalendarWrapper .rdrNextButton svg, .rdrCalendarWrapper .rdrPprevButton svg {
+  width: 22px;
+  height: 22px;
+}
+.rdrDateDisplayWrapper {
+  background: #fff !important;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+.rdrDateDisplayItem {
+  border-radius: 6px;
+  border: 1px solid #eee;
+  margin-right: 8px;
+}
+.rdrDateDisplayItemActive {
+  border: 1.5px solid #F57C00 !important;
+}
+.rdrMonth {
+  padding: 0 12px;
+}
+.rdrMonthAndYearPickers {
+  margin-bottom: 8px;
+}
+.rdrCalendarWrapper .rdrMonthAndYearPickers select {
+  color: #222 !important;
+}
+.rdrDayDisabled .rdrDayNumber span {
+  color: #eee !important;
+}
+.rdrDayToday .rdrDayNumber span {
+  box-shadow: 0 0 0 2px #F57C00 inset !important;
+}
+.rdrDay:not(.rdrDayPassive):hover .rdrDayNumber span {
+  background: #ffe0c2 !important;
+  color: #222 !important;
+}
+.rdrMonthName {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #222;
+  margin-bottom: 8px;
+}
+.rdrWeekDays span {
+  color: #222;
+  font-weight: 600;
+}
+.rdrDateRangeWrapper {
+  border-radius: 16px;
+  overflow: hidden;
+}
