@@ -5,6 +5,8 @@ import Globe from "./components/Globe";
 import TravelAddBar from "./components/TravelAddBar";
 import React from "react";
 
+type Feature = { properties: { ADMIN?: string; name?: string } };
+
 export default function Home() {
   const [visited, setVisited] = React.useState<{country: string, start: string, end: string}[]>([]);
   const [countryList, setCountryList] = React.useState<string[]>([]);
@@ -16,7 +18,7 @@ export default function Home() {
       .then(res => res.json())
       .then(data => {
         if (data.features && Array.isArray(data.features)) {
-          const names = data.features.map((f: any) => f.properties.ADMIN || f.properties.name).filter(Boolean);
+          const names = data.features.map((f: Feature) => f.properties.ADMIN || f.properties.name).filter(Boolean);
           setCountryList(Array.from(new Set(names)));
         }
       });

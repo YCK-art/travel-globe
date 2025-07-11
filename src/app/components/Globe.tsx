@@ -9,15 +9,21 @@ interface Visited {
   end: string;
 }
 
+type Feature = {
+  properties: {
+    ADMIN?: string;
+    name?: string;
+    [key: string]: any;
+  };
+};
+
 export default function GlobeComponent({ visited = [], fullScreen = false }: { visited?: Visited[], fullScreen?: boolean }) {
   function GlobeWithCountries({ visited }: { visited: Visited[] }) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const globeRef = useRef<any>(null);
+    const globeRef = useRef<object | null>(null);
     const [ready, setReady] = useState(false);
 
     useEffect(() => {
       let isMounted = true;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let globeInstance: any;
       const load = async () => {
         try {
@@ -41,7 +47,7 @@ export default function GlobeComponent({ visited = [], fullScreen = false }: { v
             );
             globeInstance
               .polygonsData(data.features)
-              .polygonCapColor((feat: any) => {
+              .polygonCapColor((feat: Feature) => {
                 const name = (feat.properties.ADMIN || feat.properties.name || "").toLowerCase();
                 return visitedSet.has(name)
                   ? "rgba(255, 99, 132, 0.7)"
