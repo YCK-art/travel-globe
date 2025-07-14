@@ -2,19 +2,16 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Toolbar from "../../components/Toolbar";
-import { FaHome, FaSearch, FaPlusSquare, FaVideo } from "react-icons/fa";
-import { FaMapMarkerAlt } from "react-icons/fa";
-import { FaPlus } from "react-icons/fa";
+
 import { storage } from "../../../lib/firebase";
-import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "firebase/storage";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../../lib/firebase";
+import { ref, deleteObject } from "firebase/storage";
 import { ReactSortable } from 'react-sortablejs';
 import html2canvas from 'html2canvas';
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import * as d3 from 'd3-geo';
 import { Dialog } from '@headlessui/react';
+import Image from 'next/image';
 
 // 모달 컴포넌트 추가
 function InstaStoryModal({ open, onClose, country, travelDay, travelType }: { open: boolean, onClose: () => void, country: string, travelDay: string|number, travelType: string }) {
@@ -25,7 +22,7 @@ function InstaStoryModal({ open, onClose, country, travelDay, travelType }: { op
     async function fetchJapan() {
       const res = await fetch('/countries-110m.geojson');
       const geo = await res.json();
-      const japan = geo.features.find((f:any) => f.properties.name === 'Japan');
+      const japan = geo.features.find((f: { properties: { name: string } }) => f.properties.name === 'Japan');
       if (!japan) return;
       const projection = d3.geoMercator().fitSize([120, 220], japan);
       const pathGen = d3.geoPath(projection);
@@ -119,13 +116,9 @@ export default function TravelDetailPage() {
   // 실제 피드 이미지 상태
   // feedImages를 객체 배열로 관리 (ReactSortable 요구)
   const [feedImages, setFeedImages] = useState<{ id: string, url: string }[]>([]);
-  const [uploading, setUploading] = useState(false);
-
   // 여행기간과 인원 상태 추가
   const [travelDays, setTravelDays] = useState<string | number>("-");
-  const [editDays, setEditDays] = useState(false);
   const [travelPeople, setTravelPeople] = useState<string | number>("-");
-  const [editPeople, setEditPeople] = useState(false);
 
   // 드롭다운 메뉴 상태
   const [showDropdown, setShowDropdown] = useState(false);
@@ -137,7 +130,6 @@ export default function TravelDetailPage() {
   const [showInstaStory, setShowInstaStory] = useState(false);
   // 모달 상태 (상세 이미지 뷰)
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalIdx, setModalIdx] = useState(0);
 
   // 여행 감정 태그 상태 추가
   const [emotionTag, setEmotionTag] = useState("");
@@ -157,42 +149,12 @@ export default function TravelDetailPage() {
         if (data.travelPeople) setTravelPeople(data.travelPeople);
         if (data.emotionTag) setEmotionTag(data.emotionTag); // 감정 태그 불러오기
       }
-    } catch (error) {
-      console.error('여행 데이터 불러오기 오류:', error);
+    } catch {
+      console.error('여행 데이터 불러오기 오류');
     }
   };
 
-  // 여행기간 저장
-  const saveTravelDays = async (days: string | number) => {
-    if (!user || !user.uid || !slug) return;
-    
-    try {
-      const travelDoc = doc(db, `users/${user.uid}/travels/${slug}`);
-      await setDoc(travelDoc, {
-        travelDays: days
-      }, { merge: true }); // merge: true로 기존 데이터 유지하면서 업데이트
-      console.log('여행기간 저장 완료:', days);
-    } catch (error) {
-      console.error('여행기간 저장 오류:', error);
-      alert('여행기간 저장 중 오류가 발생했습니다.');
-    }
-  };
 
-  // 인원 저장
-  const saveTravelPeople = async (people: string | number) => {
-    if (!user || !user.uid || !slug) return;
-    
-    try {
-      const travelDoc = doc(db, `users/${user.uid}/travels/${slug}`);
-      await setDoc(travelDoc, {
-        travelPeople: people
-      }, { merge: true }); // merge: true로 기존 데이터 유지하면서 업데이트
-      console.log('인원 저장 완료:', people);
-    } catch (error) {
-      console.error('인원 저장 오류:', error);
-      alert('인원 저장 중 오류가 발생했습니다.');
-    }
-  };
 
   // 감정 태그 저장 함수
   const saveEmotionTag = async () => {
@@ -201,124 +163,18 @@ export default function TravelDetailPage() {
     try {
       const travelDoc = doc(db, `users/${user.uid}/travels/${slug}`);
       await setDoc(travelDoc, { emotionTag }, { merge: true });
-    } catch (error) {
+    } catch {
       alert('감정 태그 저장 중 오류가 발생했습니다.');
     }
     setSavingTag(false);
   };
 
-  const handleScreenshot = async () => {
-    if (!phoneRef.current) return;
-    
-    try {
-      // 스크린샷 생성 전 잠시 대기 (이미지 로딩 완료 대기)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Firebase Storage 이미지들을 임시로 숨기거나 대체
-      const imageElements = phoneRef.current.querySelectorAll('img[src*="firebasestorage.googleapis.com"]');
-      const originalStyles: string[] = [];
-      
-      // 이미지들을 임시로 숨기거나 플레이스홀더로 대체
-      imageElements.forEach((img, index) => {
-        const imgElement = img as HTMLImageElement;
-        originalStyles[index] = imgElement.style.display;
-        imgElement.style.display = 'none'; // 임시로 숨김
-      });
-      
-      // html2canvas를 사용하여 스크린샷 생성
-      const canvas = await html2canvas(phoneRef.current, {
-        scale: 2, // 고해상도 스크린샷
-        useCORS: true, // CORS 문제 방지
-        backgroundColor: null, // 투명 배경
-        width: 430,
-        height: 922,
-        logging: false,
-        allowTaint: true
-      });
-      
-      // 원본 스타일 복원
-      imageElements.forEach((img, index) => {
-        const imgElement = img as HTMLImageElement;
-        imgElement.style.display = originalStyles[index];
-      });
-      
-      // 캔버스를 dataURL로 변환
-      const dataUrl = canvas.toDataURL('image/png');
-      
-      // 다운로드 링크 생성
-      const link = document.createElement('a');
-      link.download = `${title}_travel_${new Date().toISOString().split('T')[0]}.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      alert('스크린샷이 다운로드되었습니다! (이미지는 제외됨)');
-    } catch (error) {
-      console.error('스크린샷 생성 중 오류:', error);
-      alert('스크린샷 생성 중 오류가 발생했습니다: ' + (error as any)?.message);
-    }
-  };
-
-  // 이미지 업로드 핸들러
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !user.uid || !slug || !e.target.files) return;
-    setUploading(true);
-    const files = Array.from(e.target.files);
-    try {
-      console.log('업로드 시 user:', user, 'slug:', slug);
-      const uploadPromises = files.map(async (file) => {
-        const storageRef = ref(storage, `users/${user.uid}/travels/${slug}/images/${file.name}`);
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-        return { id: url, url };
-      });
-      const newImages = await Promise.all(uploadPromises);
-      setFeedImages(prev => [...newImages, ...prev]);
-    } catch (err) {
-      console.error('이미지 업로드 에러:', err);
-      alert('이미지 업로드 중 오류가 발생했습니다: ' + (err as any)?.message);
-    }
-    setUploading(false);
-  };
-
-  // 해당 여행지의 모든 이미지 불러오기
-  React.useEffect(() => {
-    if (!user || !user.uid || !slug) return;
-    const fetchImages = async () => {
-      const listRef = ref(storage, `users/${user.uid}/travels/${slug}/images`);
-      const res = await listAll(listRef);
-      const urls = await Promise.all(res.items.map(item => getDownloadURL(item)));
-      setFeedImages(urls.reverse().map(url => ({ id: url, url }))); // 최신 업로드가 앞에 오도록
-    };
-    fetchImages();
-  }, [user, slug]);
-
-  // 상세페이지에서도 로그인 상태 유지 (onAuthStateChanged)
-  React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName,
-          photoURL: firebaseUser.photoURL,
-          providerId: firebaseUser.providerId,
-        });
-      } else {
-        setUser(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // 여행 데이터 로드 및 저장 후 실행
-  React.useEffect(() => {
+  useEffect(() => {
     loadTravelData();
   }, [user, slug]);
 
   // 드롭다운 외부 클릭 시 닫기
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
       if (!target.closest('.dropdown-container')) {
@@ -334,11 +190,6 @@ export default function TravelDetailPage() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showDropdown]);
-
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const handlePlusClick = () => {
-    fileInputRef.current?.click();
-  };
 
   // 이미지 삭제 핸들러
   const handleDeleteImage = async (imgUrl: string) => {
@@ -358,7 +209,7 @@ export default function TravelDetailPage() {
       await deleteObject(imgRef);
       setFeedImages(prev => prev.filter(img => img.url !== imgUrl));
     } catch (err) {
-      alert('이미지 삭제 중 오류가 발생했습니다: ' + (err as any)?.message);
+      alert('이미지 삭제 중 오류가 발생했습니다: ' + (err as Error)?.message);
     }
   };
 
@@ -366,8 +217,7 @@ export default function TravelDetailPage() {
   // react-sortablejs는 setList로 자동 정렬됨 (별도 핸들러 불필요)
 
   // 상세 이미지 모달 오픈
-  const openImageModal = (idx: number) => {
-    setModalIdx(idx);
+  const openImageModal = () => {
     setModalOpen(true);
   };
 
@@ -383,7 +233,7 @@ export default function TravelDetailPage() {
           {/* 상단 정보 패널 (Airbnb 감성) */}
           <div className="w-full px-8 pt-10 pb-6 bg-gray-900/80 flex flex-col items-center rounded-b-3xl shadow-md" style={{boxShadow:'0 4px 24px 0 rgba(0,0,0,0.3)'}}>
             <div className="flex items-center gap-4 mb-2">
-              <img src={imageUrl} alt={title} className="w-16 h-16 rounded-2xl object-cover border-2 border-gray-600 shadow" />
+              <Image src={imageUrl} alt={title} width={64} height={64} className="rounded-2xl object-cover border-2 border-gray-600 shadow" />
               <div className="flex flex-col">
                 <span className="text-2xl font-bold tracking-tight text-white" style={{letterSpacing:'-1px'}}>{title}</span>
                 <div className="flex gap-2 mt-1">
@@ -393,7 +243,7 @@ export default function TravelDetailPage() {
                 </div>
               </div>
             </div>
-            <div className="text-gray-400 text-sm mt-1">Don't just see a place. Experience it.</div>
+            <div className="text-gray-400 text-sm mt-1">Don&apos;t just see a place. Experience it.</div>
             {/* 여행 감정 태그 입력란 */}
             <div className="w-full flex flex-row items-center gap-2 mt-4">
               <input
@@ -444,9 +294,9 @@ export default function TravelDetailPage() {
               list={feedImages}
               setList={setFeedImages}
             >
-              {feedImages.map((img, idx) => (
-                <div key={img.id} className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-gray-800 group shadow hover:shadow-lg transition cursor-pointer" onClick={() => openImageModal(idx)}>
-                  <img src={img.url} alt={title + idx} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                             {feedImages.map((img) => (
+                 <div key={img.id} className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-gray-800 group shadow hover:shadow-lg transition cursor-pointer" onClick={openImageModal}>
+                   <Image src={img.url} alt={title} width={200} height={250} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                   {/* 오버레이/메모/삭제 */}
                   <button
                     className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
@@ -467,7 +317,7 @@ export default function TravelDetailPage() {
           <Dialog.Panel className="bg-gray-900 rounded-2xl shadow-2xl p-0 max-w-[90vw] max-h-[90vh] flex flex-col items-center">
             <div className="relative w-[320px] h-[400px] flex items-center justify-center">
               {feedImages[0] && (
-                <img src={feedImages[0].url} alt={title} className="w-full h-full object-contain rounded-xl" />
+                <Image src={feedImages[0].url} alt={title} width={320} height={400} className="w-full h-full object-contain rounded-xl" />
               )}
               {/* 좌우 넘기기 버튼 완전히 제거 */}
               <button

@@ -126,13 +126,13 @@ function CameraFocus({ lat, lon }: { lat: number, lon: number }) {
     const camPos = latLonToVector3(lat, lon, 220); // 카메라 위치
     camera.position.copy(camPos);
     camera.lookAt(target);
-    // controls를 any로 캐스팅하여 타입 안전성 우회
-    const orbit = controls as any;
+    // controls를 unknown 타입으로 캐스팅
+    const orbit = controls as unknown as { target: THREE.Vector3; update: () => void };
     if (orbit && orbit.target && typeof orbit.update === 'function') {
       orbit.target.copy(target);
       orbit.update();
     }
-  }, [lat, lon]);
+  }, [lat, lon, camera, controls]);
   return null;
 }
 
@@ -254,7 +254,7 @@ export default function GlobeComponent({
         canvas.addEventListener('mousemove', handleMouseMove);
         return () => canvas.removeEventListener('mousemove', handleMouseMove);
       }
-    }, [camera, scene, visited]);
+    }, [camera, scene]);
     return null;
   }
 

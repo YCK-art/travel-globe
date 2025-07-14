@@ -18,15 +18,6 @@ import { useRouter } from "next/navigation";
 // Globe 컴포넌트를 동적 import로 변경 (SSR 비활성화)
 const Globe = dynamic(() => import("./components/Globe"), { ssr: false });
 
-interface City {
-  name: string;
-  lat: string;
-  lng: string;
-  country: string;
-  admin1: string;
-  admin2: string;
-}
-
 interface Visited {
   country: string;
   start: string;
@@ -40,7 +31,7 @@ export default function Home() {
   const router = useRouter();
   const [visited, setVisited] = React.useState<Visited[]>([]);
   const [countryList, setCountryList] = React.useState<string[]>([]);
-  const [cities, setCities] = React.useState<City[]>([]);
+
   const [showToolbar, setShowToolbar] = React.useState(true);
   const [segment, setSegment] = React.useState<"record"|"destination">("record");
   const lastScrollY = React.useRef(0);
@@ -51,7 +42,7 @@ export default function Home() {
   const visitedCities = React.useMemo(() => {
     // 마커 초기화: 빈 배열 반환
     return [];
-  }, [visited]);
+  }, []);
 
   React.useEffect(() => {
     fetch("/countries-110m.geojson")
@@ -64,19 +55,7 @@ export default function Home() {
       });
   }, []);
 
-  // 도시 데이터 로드 (자동완성용)
-  React.useEffect(() => {
-    fetch("/cities.json")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setCities(data);
-        }
-      })
-      .catch(error => {
-        console.error('도시 데이터 로드 실패:', error);
-      });
-  }, []);
+
 
   React.useEffect(() => {
     if (user && user.uid) {

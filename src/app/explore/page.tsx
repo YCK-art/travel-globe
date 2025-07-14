@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import Toolbar from "../components/Toolbar";
 import SegmentControl from "../components/SegmentControl";
+import Image from "next/image";
 
 // Explore 대표 이미지는 public/explore-images 폴더에서만 불러옵니다.
 const IMAGE_PATH = "/explore-images/";
@@ -54,10 +55,11 @@ export default function ExplorePage() {
             <MdChevronLeft size={40} color="#222" />
           </button>
           {images.length > 0 && (
-            <img
+            <Image
               src={IMAGE_PATH + images[current]}
               alt="Travel Slide"
-              className="w-full h-full object-cover object-center select-none"
+              fill
+              className="object-cover object-center select-none"
               draggable={false}
             />
           )}

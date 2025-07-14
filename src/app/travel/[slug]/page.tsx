@@ -1,66 +1,25 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Toolbar from "../../components/Toolbar";
 import Image from "next/image";
 import Link from "next/link";
-import { FaChevronLeft, FaChevronRight, FaRegHeart, FaHeart, FaChevronDown, FaLeaf, FaRegSmile, FaSpa, FaRegClock, FaRegSmileBeam, FaFeatherAlt, FaCloud, FaUserSecret, FaUserFriends, FaRing, FaUsers, FaUser, FaUserTie, FaChild, FaStar, FaHiking, FaUtensils, FaPlaneDeparture, FaBiking, FaTree, FaLandmark, FaCamera, FaWalking, FaCheck, FaPen, FaPlus, FaTimes, FaCalendarAlt, FaSearch } from "react-icons/fa";
-import { useParams } from "next/navigation";
+import { FaRegHeart, FaHeart, FaLeaf, FaRegSmile, FaSpa, FaRegClock, FaRegSmileBeam, FaFeatherAlt, FaCloud, FaUserSecret, FaUserFriends, FaRing, FaUsers, FaUser, FaUserTie, FaChild, FaStar, FaHiking, FaUtensils, FaPlaneDeparture, FaBiking, FaTree, FaLandmark, FaCamera, FaWalking, FaCheck, FaPen, FaPlus, FaTimes, FaCalendarAlt, FaSearch } from "react-icons/fa";
 import { auth } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import SegmentControl from "../../components/SegmentControl";
 import { db, storage } from "../../../lib/firebase";
 import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "firebase/storage";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 
-const BREADCRUMB = ["유럽", "프랑스", "일드프랑스", "파리"];
-const MAIN_IMAGES = [
-  "/travel-images/japan.jpg",
-  "/travel-images/south_korea.jpg"
-];
-const PLACE_TITLE = "geo 둘러보기";
-const FILTERS = ["필수사항", "Travelers' Choice", "전통 가옥 최적화", "숨겨진 보석 같은 곳", "박물관", "야외", "예술 및 극장", "밤 문화"];
-const CARDS = [
-  {
-    img: "/travel-images/japan.jpg",
-    title: "에펠 탑",
-    rating: 4.6,
-    reviews: 154305,
-    category: "건축물, 전망대",
-  },
-  {
-    img: "/travel-images/south_korea.jpg",
-    title: "루브르 박물관",
-    rating: 4.8,
-    reviews: 103955,
-    category: "건축물, 미술관",
-  },
-  {
-    img: "/travel-images/japan.jpg",
-    title: "개선문",
-    rating: 4.5,
-    reviews: 46335,
-    category: "건축물, 역사적인 장소",
-  },
-];
 
-// slug가 영어일 때 한글 위키백과용 매핑
-const slugToKo: Record<string, string> = {
-  japan: "일본",
-  france: "프랑스",
-  korea: "대한민국",
-  germany: "독일",
-  spain: "스페인",
-  italy: "이탈리아",
-  usa: "미국",
-  china: "중국",
-  // 필요시 추가
-};
+
+
 
 // 영어 위키백과용 매핑 추가
 const slugToEn: Record<string, string> = {
@@ -156,9 +115,7 @@ interface City {
 
 export default function TravelDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
-  const [user, setUser] = useState<any>(null);
-  const [mainIdx, setMainIdx] = useState(0);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [user, setUser] = useState<{ uid: string; email: string | null; displayName: string | null; photoURL: string | null; providerId: string } | null>(null);
   const [emotionModal, setEmotionModal] = useState(false);
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [isEmotionLoaded, setIsEmotionLoaded] = useState(false);
@@ -166,7 +123,7 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
   
   // 추억앨범 사진 업로드/불러오기 상태
   const [photoURLs, setPhotoURLs] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
+
 
   // 여행 기간 상태
   const [showDateModal, setShowDateModal] = useState(false);
@@ -343,7 +300,6 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
     if (!user) return;
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    setUploading(true);
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -352,10 +308,9 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
       }
       // 업로드 후 목록 새로고침
       await fetchPhotos();
-    } catch (err) {
+    } catch {
       alert('사진 업로드 실패');
     }
-    setUploading(false);
   };
 
   // Storage에서 내 uid 경로의 사진 목록 불러오기
@@ -376,33 +331,22 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
   const handleDeletePhoto = async (url: string) => {
     if (!user) return;
     try {
-      // Storage 참조 경로 추출
-      const baseUrl = "https://firebasestorage.googleapis.com/v0/b/";
-      const bucket = "travel-globe-dfcfc.firebasestorage.app";
       const pathStart = `/o/`;
       const idx = url.indexOf(pathStart);
       if (idx === -1) return;
-      let path = decodeURIComponent(url.substring(idx + 3, url.indexOf("?", idx)));
+      const path = decodeURIComponent(url.substring(idx + 3, url.indexOf("?", idx)));
       const fileRef = ref(storage, path);
       await deleteObject(fileRef);
       setPhotoURLs(urls => urls.filter(u => u !== url));
-    } catch (err) {
+    } catch {
       alert('사진 삭제 실패');
     }
   };
 
-  // 드래그 앤 드롭 순서 변경
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
-    const newOrder = Array.from(photoURLs);
-    const [removed] = newOrder.splice(result.source.index, 1);
-    newOrder.splice(result.destination.index, 0, removed);
-    setPhotoURLs(newOrder);
-  };
 
 
-  const urlParams = useParams();
-  const locale = typeof urlParams === 'object' && 'locale' in urlParams ? (urlParams as any).locale : 'ko';
+
+
   const [desc, setDesc] = useState("여행지 정보를 불러오는 중...");
   const [descExpanded, setDescExpanded] = useState(false);
   
@@ -437,7 +381,7 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
       }
       const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`);
       if (!res.ok) {
-        setDesc("Travel information not found.");
+        setDesc("여행지에 대한 설명이 없습니다.");
         return;
       }
       const data = await res.json();
@@ -446,8 +390,7 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
     fetchDesc();
   }, [slug]);
 
-  // 필터 선택
-  const toggleFilter = (f: string) => setSelectedFilters(s => s.includes(f) ? s.filter(x => x !== f) : [...s, f]);
+
 
   const toggleEmotion = (tag: string) => {
     setSelectedEmotions(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
@@ -587,7 +530,13 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
       <div className="min-h-screen bg-white">
         <Toolbar user={user} setUser={setUser}>
           <div className="flex-1 flex justify-center">
-            <SegmentControl value={segment} onChange={setSegment} />
+            <SegmentControl
+              value={segment}
+              onChange={(val) => {
+                if (val === 'record' || val === 'destination') setSegment(val);
+                // 'ai'는 무시
+              }}
+            />
           </div>
         </Toolbar>
       {/* 대표 이미지 바깥, 왼쪽 상단 아주 작은 네비게이션 */}
@@ -681,7 +630,7 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
         <div className="flex flex-wrap gap-2 mb-2 relative group min-h-[32px]">
           {selectedEmotions.length === 0 ? (
             <>
-              <span className="text-gray-400 text-sm" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>You haven't selected any emotion tags yet.</span>
+              <span className="text-gray-400 text-sm" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>You haven&apos;t selected any emotion tags yet.</span>
             </>
           ) : (
             <>
@@ -751,7 +700,7 @@ export default function TravelDetailPage({ params }: { params: Promise<{ slug: s
         </div>
         {/* 조건부 렌더링: 사진 없을 때 안내문구, 있을 때 DndContext */}
         {photoURLs.length === 0 ? (
-          <div className="text-gray-400 text-sm py-8 text-center" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>You don't have any photos in your travel album yet.</div>
+          <div className="text-gray-400 text-sm py-8 text-center" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>You don&apos;t have any photos in your travel album yet.</div>
         ) : (
           <DndContext
             sensors={sensors}
