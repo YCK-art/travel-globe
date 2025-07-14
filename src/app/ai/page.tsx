@@ -8,7 +8,7 @@ import { FiMapPin } from "react-icons/fi";
 import { GiPolarStar } from "react-icons/gi";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import ReactMarkdown, { Components } from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
 import {
   collection,
   doc,
@@ -204,7 +204,7 @@ export default function AISearchPage() {
   //   { id: 4, title: "유럽 배낭여행", icon: <FiGlobe size={16} color="#eb4605" /> },
   // ];
 
-  const markdownComponents: Record<string, (props: any) => React.ReactNode> = {
+  const markdownComponents: Record<string, (props: object) => React.ReactNode> = {
     h1: (props) => <h1 className="text-2xl font-bold mt-4 mb-2" {...props} />, 
     h2: (props) => <h2 className="text-xl font-bold mt-4 mb-2" {...props} />, 
     h3: (props) => <h3 className="text-lg font-bold mt-3 mb-1" {...props} />, 
