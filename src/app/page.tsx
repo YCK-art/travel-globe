@@ -168,17 +168,6 @@ export default function Home() {
     }
   };
 
-  // 모든 데이터 초기화 함수
-  const handleReset = () => {
-    setVisited([]);
-    // 로컬 스토리지도 초기화 (혹시 저장된 데이터가 있다면)
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('visited');
-      localStorage.removeItem('travelData');
-    }
-    console.log('모든 여행 데이터가 초기화되었습니다.');
-  };
-
   // 여행지 이미지 경로 생성 함수
   function getImagePath(city?: string, country?: string) {
     if (city && country) {
@@ -217,7 +206,6 @@ export default function Home() {
           <TravelAddBar
             onAdd={handleAdd}
             countryList={countryList}
-            cities={cities}
             isLoggedIn={!!user}
             onLoginOpen={() => setLoginModalOpen(true)}
           />

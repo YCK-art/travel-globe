@@ -3,25 +3,15 @@ import React from "react";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-interface City {
-  name: string;
-  lat: string;
-  lng: string;
-  country: string;
-  admin1: string;
-  admin2: string;
-}
-
 interface TravelAddBarProps {
   onAdd: (country: string, start: string, end: string, city?: string, lat?: number, lon?: number) => void;
   countryList: string[];
-  cities?: City[];
   compact?: boolean;
   isLoggedIn: boolean;
   onLoginOpen: () => void;
 }
 
-export default function TravelAddBar({ onAdd, countryList, cities = [], compact = false, isLoggedIn, onLoginOpen }: TravelAddBarProps) {
+export default function TravelAddBar({ onAdd, countryList, compact = false, isLoggedIn, onLoginOpen }: TravelAddBarProps) {
   const [country, setCountry] = React.useState("");
   const [showDropdown, setShowDropdown] = React.useState(false);
   const countryInputRef = React.useRef<HTMLInputElement>(null);
