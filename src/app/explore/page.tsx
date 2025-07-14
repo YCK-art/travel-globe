@@ -1,19 +1,18 @@
 "use client";
 
-import Toolbar from "../components/Toolbar";
-import SegmentControl from "../components/SegmentControl";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import Toolbar from "../components/Toolbar";
+import SegmentControl from "../components/SegmentControl";
 
 // Explore 대표 이미지는 public/explore-images 폴더에서만 불러옵니다.
 const IMAGE_PATH = "/explore-images/";
 const images = ["switzerland.jpg", "china.jpg"];
 
 export default function ExplorePage() {
-  const [user, setUser] = React.useState<{ uid: string; email: string | null; displayName: string | null; photoURL: string | null; providerId: string } | null>(null);
   const router = useRouter();
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = React.useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -28,15 +27,17 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Toolbar user={user} setUser={setUser}>
+      <Toolbar user={null} setUser={() => {}}>
         <div className="flex-1 flex justify-center">
           <SegmentControl
             value="destination"
-            onChange={(val: "record" | "destination" | "ai") => {
-              if (val === "record") {
-                router.push("/");
+            onChange={(val) => {
+              if (val === "destination") {
+                router.push("/explore");
               } else if (val === "ai") {
                 router.push("/ai");
+              } else {
+                router.push("/");
               }
             }}
           />

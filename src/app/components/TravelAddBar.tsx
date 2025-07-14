@@ -60,16 +60,15 @@ export default function TravelAddBar({ onAdd, countryList, cities = [], compact 
               ref={countryInputRef}
               className="outline-none bg-transparent text-gray-700 placeholder:text-gray-400 w-full text-center text-sm"
               style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}
-              placeholder={loading ? "Loading..." : "Search by country"}
+              placeholder="Search by country"
               value={ellipsisCity(country)}
               onChange={e => {
                 setCountry(e.target.value);
                 setShowDropdown(true);
               }}
-              onFocus={() => { setShowDropdown(true); setFocused('where'); }}
+              onFocus={() => { setShowDropdown(true); }}
               onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
               autoComplete="off"
-              disabled={loading}
               onKeyDown={e => {
                 if (e.key === 'Enter' && filtered.length > 0) {
                   const item = filtered[0];
@@ -108,14 +107,7 @@ export default function TravelAddBar({ onAdd, countryList, cities = [], compact 
                 return;
               }
               if (country) {
-                const addData = {
-                  country,
-                  city: selectedCity?.city,
-                  lat: selectedCity?.lat,
-                  lon: selectedCity?.lon
-                };
-                console.log('여행지 추가:', addData);
-                onAdd(country, "", "", selectedCity?.city, selectedCity?.lat, selectedCity?.lon);
+                onAdd(country, "", "");
               }
             }}
             aria-label="여행지 추가"
