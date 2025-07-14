@@ -18,8 +18,6 @@ import { useRouter } from "next/navigation";
 // Globe 컴포넌트를 동적 import로 변경 (SSR 비활성화)
 const Globe = dynamic(() => import("./components/Globe"), { ssr: false });
 
-type Feature = { properties: { ADMIN?: string; name?: string } };
-
 interface City {
   name: string;
   lat: string;
@@ -60,7 +58,7 @@ export default function Home() {
       .then(res => res.json())
       .then(data => {
         if (data.features && Array.isArray(data.features)) {
-          const names = data.features.map((f: Feature) => f.properties.ADMIN || f.properties.name).filter(Boolean);
+          const names = data.features.map((f: { properties: { ADMIN?: string; name?: string } }) => f.properties.ADMIN || f.properties.name).filter(Boolean);
           setCountryList(Array.from(new Set(names)));
         }
       });
@@ -225,7 +223,7 @@ export default function Home() {
           />
         </div>
         <div className="w-full flex-1 flex items-center justify-center mt-24">
-          <Globe visited={visited} fullScreen cities={visitedCities} focus={focus} />
+          <Globe visited={visited} cities={visitedCities} focus={focus} />
         </div>
         <LoginModal open={loginModalOpen} onClose={() => setLoginModalOpen(false)} onLogin={setUser} />
       </section>
