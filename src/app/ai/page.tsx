@@ -3,8 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 import Toolbar from "../components/Toolbar";
 import SegmentControl from "../components/SegmentControl";
 import { useRouter } from "next/navigation";
-import { FiPlus, FiMessageSquare, FiChevronLeft, FiChevronRight, FiArrowUp, FiSun, FiDollarSign, FiAnchor, FiCoffee, FiSliders } from "react-icons/fi";
-import { FiMapPin, FiGlobe } from "react-icons/fi";
+import { FiPlus, FiMessageSquare, FiChevronLeft, FiChevronRight, FiArrowUp, FiSun, FiDollarSign, FiAnchor } from "react-icons/fi";
+import { FiMapPin } from "react-icons/fi";
 import { GiPolarStar } from "react-icons/gi";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -14,8 +14,6 @@ import {
   doc,
   setDoc,
   getDoc,
-  getDocs,
-  addDoc,
   updateDoc,
   serverTimestamp,
   onSnapshot,
@@ -36,7 +34,14 @@ export default function AISearchPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatId, setChatId] = useState<string | null>(null);
-  const [recentChats, setRecentChats] = useState<any[]>([]);
+  interface ChatSummary {
+    id: string;
+    title: string;
+    updatedAt?: any;
+    createdAt?: any;
+    messages?: { role: string; content: string; timestamp: number }[];
+  }
+  const [recentChats, setRecentChats] = useState<ChatSummary[]>([]);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -49,7 +54,16 @@ export default function AISearchPage() {
     if (!user) return;
     const q = query(collection(db, `users/${user.uid}/chats`), orderBy('updatedAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const chats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const chats = snapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          title: data.title || '',
+          updatedAt: data.updatedAt,
+          createdAt: data.createdAt,
+          messages: data.messages || [],
+        } as ChatSummary;
+      });
       setRecentChats(chats);
     });
     return () => unsubscribe();
@@ -92,7 +106,7 @@ export default function AISearchPage() {
     const chatRef = doc(db, `users/${user.uid}/chats/${currentChatId}`);
     // Firestore에 메시지 추가
     const chatSnap = await getDoc(chatRef);
-    let prevMessages = chatSnap.exists() ? chatSnap.data().messages || [] : [];
+    const prevMessages = chatSnap.exists() ? chatSnap.data().messages || [] : [];
     const newMessages = [...prevMessages, { role: 'user', content: input, timestamp: Date.now() }];
     await updateDoc(chatRef, {
       messages: newMessages,
@@ -111,7 +125,7 @@ export default function AISearchPage() {
       const data = await res.json();
       // Firestore에 assistant 답변 추가
       const chatSnap2 = await getDoc(chatRef);
-      let prevMessages2 = chatSnap2.exists() ? chatSnap2.data().messages || [] : [];
+      const prevMessages2 = chatSnap2.exists() ? chatSnap2.data().messages || [] : [];
       const newMessages2 = [...prevMessages2, { role: 'assistant', content: data.result, timestamp: Date.now() }];
       await updateDoc(chatRef, {
         messages: newMessages2,
@@ -189,16 +203,16 @@ export default function AISearchPage() {
   // ];
 
   const markdownComponents = {
-    h1: ({node, ...props}: {node?: any, [key: string]: any}) => <h1 className="text-2xl font-bold mt-4 mb-2" {...props} />,
-    h2: ({node, ...props}: {node?: any, [key: string]: any}) => <h2 className="text-xl font-bold mt-4 mb-2" {...props} />,
-    h3: ({node, ...props}: {node?: any, [key: string]: any}) => <h3 className="text-lg font-bold mt-3 mb-1" {...props} />,
-    strong: ({node, ...props}: {node?: any, [key: string]: any}) => <strong className="font-bold text-black" {...props} />,
-    ul: ({node, ...props}: {node?: any, [key: string]: any}) => <ul className="list-disc pl-6 my-2" {...props} />,
-    ol: ({node, ...props}: {node?: any, [key: string]: any}) => <ol className="list-decimal pl-6 my-2" {...props} />,
-    li: ({node, ...props}: {node?: any, [key: string]: any}) => <li className="mb-1" {...props} />,
-    hr: ({node, ...props}: {node?: any, [key: string]: any}) => <hr className="my-4 border-t border-gray-300" {...props} />,
-    p: ({node, ...props}: {node?: any, [key: string]: any}) => <p className="my-2 leading-relaxed" {...props} />,
-    blockquote: ({node, ...props}: {node?: any, [key: string]: any}) => <blockquote className="border-l-4 border-gray-300 pl-4 italic text-gray-600 my-2" {...props} />,
+    h1: (props: any) => <h1 className="text-2xl font-bold mt-4 mb-2" {...props} />, 
+    h2: (props: any) => <h2 className="text-xl font-bold mt-4 mb-2" {...props} />, 
+    h3: (props: any) => <h3 className="text-lg font-bold mt-3 mb-1" {...props} />, 
+    strong: (props: any) => <strong className="font-bold text-black" {...props} />, 
+    ul: (props: any) => <ul className="list-disc pl-6 my-2" {...props} />, 
+    ol: (props: any) => <ol className="list-decimal pl-6 my-2" {...props} />, 
+    li: (props: any) => <li className="mb-1" {...props} />, 
+    hr: (props: any) => <hr className="my-4 border-t border-gray-300" {...props} />, 
+    p: (props: any) => <p className="my-2 leading-relaxed" {...props} />, 
+    blockquote: (props: any) => <blockquote className="border-l-4 border-gray-300 pl-4 italic text-gray-600 my-2" {...props} />, 
   };
 
   return (
@@ -262,8 +276,7 @@ export default function AISearchPage() {
                 <ul className="flex flex-col gap-1">
                   {recentChats.map(chat => (
                     <li key={chat.id} className="px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-lg cursor-pointer flex items-center gap-2" onClick={() => handleSelectChat(chat.id)}>
-                      {chat.icon && chat.icon}
-                      <span style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>{chat.title}</span>
+                        <span style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>{chat.title}</span>
                     </li>
                   ))}
                 </ul>
@@ -364,15 +377,14 @@ export default function AISearchPage() {
                 />
               </div>
               <div className="w-full flex flex-col gap-4">
-                {recentChats.map((chat, idx) => (
-                  <div key={chat.id} className="w-full bg-white border border-gray-200 rounded-xl p-5 flex flex-col shadow-sm hover:shadow-md transition cursor-pointer" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}} onClick={() => handleSelectChat(chat.id)}>
-                    <div className="flex items-center gap-2 mb-1">
-                      {chat.icon && chat.icon}
-                      <span className="font-bold text-base text-[#222]" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>{chat.title}</span>
-                    </div>
-                    <span className="text-xs text-gray-400" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>Last message just now</span>
-                  </div>
-                ))}
+                  {recentChats.map((chat) => (
+                   <div key={chat.id} className="w-full bg-white border border-gray-200 rounded-xl p-5 flex flex-col shadow-sm hover:shadow-md transition cursor-pointer" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}} onClick={() => handleSelectChat(chat.id)}>
+                     <div className="flex items-center gap-2 mb-1">
+                       <span className="font-bold text-base text-[#222]" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>{chat.title}</span>
+                     </div>
+                     <span className="text-xs text-gray-400" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>Last message just now</span>
+                   </div>
+                 ))}
               </div>
             </div>
           )}
