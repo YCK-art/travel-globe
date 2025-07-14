@@ -1,35 +1,48 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DateRange } from "react-date-range";
 import { ko } from "date-fns/locale";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-// useTranslation 등 i18n 관련 코드 제거
 
-interface TravelAddBarProps {
-  onAdd: (country: string, start: string, end: string) => void;
-  countryList: string[];
-  compact?: boolean;
+interface City {
+  name: string;
+  lat: string;
+  lng: string;
+  country: string;
+  admin1: string;
+  admin2: string;
 }
 
-export default function TravelAddBar({ onAdd, countryList, compact = false }: TravelAddBarProps) {
+interface TravelAddBarProps {
+  onAdd: (country: string, start: string, end: string, city?: string, lat?: number, lon?: number) => void;
+  countryList: string[];
+  cities?: City[];
+  compact?: boolean;
+  isLoggedIn: boolean;
+  onLoginOpen: () => void;
+}
+
+export default function TravelAddBar({ onAdd, countryList, cities = [], compact = false, isLoggedIn, onLoginOpen }: TravelAddBarProps) {
   const [country, setCountry] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [range, setRange] = useState([
-    {
-      startDate: null as Date | null,
-      endDate: null as Date | null,
-      key: "selection",
-    },
-  ]);
-  // useTranslation 등 i18n 관련 코드 제거
+  const [loading, setLoading] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<{city: string, lat: number, lon: number} | null>(null);
+  const [focused, setFocused] = useState<'where' | null>('where');
+  const countryInputRef = React.useRef<HTMLInputElement>(null);
 
-  // 입력값과 일치하는 국가명 필터링
+  // 입력값과 일치하는 국가명만 필터링
   const filtered = country
-    ? countryList.filter(
-        c => c.toLowerCase().includes(country.trim().toLowerCase())
-      ).slice(0, 8)
+    ? countryList
+        .filter(countryName => 
+          countryName.toLowerCase().includes(country.trim().toLowerCase())
+        )
+        .slice(0, 8)
+        .map(countryName => ({
+          display: countryName,
+          value: countryName,
+        }))
     : [];
 
   // 날짜 포맷 함수 (UTC 문제 방지)
@@ -41,147 +54,93 @@ export default function TravelAddBar({ onAdd, countryList, compact = false }: Tr
     return `${y}-${m}-${d}`;
   }
 
-  const start = range[0].startDate ? formatDate(range[0].startDate) : "";
-  const end = range[0].endDate ? formatDate(range[0].endDate) : "";
+  // 도시명 25자 초과시 ... 처리 함수
+  function ellipsisCity(name: string) {
+    return name.length > 25 ? name.slice(0, 25) + '...' : name;
+  }
+
+  // 출국일, 귀국일 관련 상태, ref, 함수 제거
+
+  // bar 높이 및 padding/slim 스타일 조정
+  const barHeight = compact ? 'h-12' : 'h-16';
+  const sectionPad = compact ? 'py-1 px-3' : 'py-2 px-6';
+  const sectionFont = compact ? 'text-[15px]' : 'text-base';
 
   return (
-    <div className={`bg-white rounded-full shadow-lg ${compact ? "px-4 py-2 w-[400px] h-12" : "px-8 py-4 w-full max-w-5xl"} flex items-center gap-2 transition-all duration-300`}>
-      {/* compact일 때 라벨 숨기고 input만 한줄로 */}
-      <div className="flex-1 flex flex-col relative">
-        {!compact && <span className="text-sm font-semibold text-black">여행지</span>}
-        <input
-          className="outline-none bg-transparent text-gray-700 text-base placeholder:text-gray-400"
-          placeholder="국가명 입력"
-          value={country}
-          onChange={e => {
-            setCountry(e.target.value);
-            setShowDropdown(true);
-          }}
-          onFocus={() => setShowDropdown(true)}
-          onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-          autoComplete="off"
-          style={compact ? {height: 32, fontSize: 15} : {}}
-        />
-        {showDropdown && filtered.length > 0 && !compact && (
-          <ul className="absolute top-14 left-0 w-full bg-white border border-gray-200 rounded-lg shadow max-h-56 overflow-auto z-50">
-            {filtered.map((c) => (
-              <li
-                key={c}
-                className="px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-700"
-                onMouseDown={() => {
-                  setCountry(c);
+    <div className="w-full flex justify-center items-center">
+      <div className={`relative bg-gray-100 rounded-full shadow-lg border-t border-gray-200 w-[400px] flex items-center gap-0 transition-all duration-300 ${barHeight} px-2 justify-center`}>
+        {/* 여행지 입력 */}
+        <div className="flex-1 flex flex-col items-center justify-center h-full max-w-xl mx-auto">
+          <div className={`flex flex-col items-center justify-center w-full h-full ${sectionPad} ${sectionFont}`}> 
+            {!compact && <span className="text-base font-semibold text-black mb-0.5" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>Destination</span>}
+            <input
+              ref={countryInputRef}
+              className="outline-none bg-transparent text-gray-700 placeholder:text-gray-400 w-full text-center text-sm"
+              style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}
+              placeholder={loading ? "Loading..." : "Search by country"}
+              value={ellipsisCity(country)}
+              onChange={e => {
+                setCountry(e.target.value);
+                setShowDropdown(true);
+              }}
+              onFocus={() => { setShowDropdown(true); setFocused('where'); }}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+              autoComplete="off"
+              disabled={loading}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && filtered.length > 0) {
+                  const item = filtered[0];
+                  setCountry(item.value);
                   setShowDropdown(false);
-                }}
-              >
-                {c}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      {!compact && <div className="w-px h-8 bg-gray-200 mx-2" />}
-      <div className="flex-1 flex flex-col relative">
-        {!compact && <span className="text-sm font-semibold text-black">출국일</span>}
-        <div className="flex items-center gap-2">
-          <button
-            className="outline-none bg-transparent text-gray-700 text-base placeholder:text-gray-400 text-left border-b border-gray-200 py-1"
-            onClick={() => {
-              setRange([{ startDate: null, endDate: null, key: "selection" }]);
-              setShowCalendar(v => !v);
-            }}
-            type="button"
-            style={compact ? {height: 32, fontSize: 15, padding: 0, border: 0} : {}}
-          >
-            {start ? start : "날짜 선택"}
-          </button>
-          {start && !compact && (
-            <button
-              className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-500 text-lg ml-1"
-              onClick={() => setRange([{ ...range[0], startDate: null }])}
-              type="button"
-              tabIndex={-1}
-              aria-label="출국일 초기화"
-            >
-              ×
-            </button>
-          )}
-        </div>
-        {showCalendar && !compact && (
-          <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-5xl bg-white rounded-2xl shadow-xl p-8 flex flex-col justify-between animate-fadeIn">
-            <DateRange
-              editableDateInputs={true}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onChange={(item: any) => setRange([item.selection])}
-              moveRangeOnFirstSelection={false}
-              ranges={[{
-                startDate: range[0].startDate,
-                endDate: range[0].endDate,
-                key: "selection",
-                color: "#F57C00"
-              }]}
-              locale={ko}
-              months={2}
-              direction="horizontal"
-              showMonthAndYearPickers={false}
-              rangeColors={["#F57C00"]}
-              staticRanges={[]}
-              inputRanges={[]}
+                }
+              }}
             />
-            <div className="flex justify-end pt-4">
-              <button
-                className="bg-[#F57C00] text-white px-4 py-2 rounded-lg shadow hover:bg-[#ff9800] transition"
-                onClick={() => {
-                  if (country && start && end) onAdd(country, start, end);
-                  setShowCalendar(false);
-                }}
-                type="button"
-              >
-                적용
-              </button>
-            </div>
+            {showDropdown && filtered.length > 0 && !compact && (
+              <ul className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[min(350px,100%)] bg-white border border-gray-200 rounded-2xl shadow-lg overflow-auto z-30 px-2 py-2">
+                {filtered.slice(0, 6).map((item, index) => (
+                  <li
+                    key={index}
+                    className={`px-4 py-2 hover:bg-pink-50 cursor-pointer text-gray-700 ${index !== filtered.slice(0, 6).length - 1 ? 'border-b border-gray-100' : ''}`}
+                    onMouseDown={() => {
+                      setCountry(item.value);
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <div className="font-medium">{item.value}</div>
+                    <div className="text-xs text-gray-400 mt-0.5">Country</div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-        )}
-      </div>
-      {!compact && <div className="w-px h-8 bg-gray-200 mx-2" />}
-      <div className="flex-1 flex flex-col">
-        {!compact && <span className="text-sm font-semibold text-black">귀국일</span>}
-        <div className="flex items-center gap-2">
+        </div>
+        {/* +버튼 */}
+        <div className="flex items-center justify-center h-full ml-2">
           <button
-            className="outline-none bg-transparent text-gray-700 text-base placeholder:text-gray-400 text-left border-b border-gray-200 py-1"
+            className={`rounded-full flex items-center justify-center text-white text-2xl shadow transition w-12 h-12 min-w-[3rem] min-h-[3rem] bg-gradient-to-r from-[#ff9800] via-[#ff7300] to-[#eb4605] hover:from-[#ffb74d] hover:via-[#ff9800] hover:to-[#ff7300]`}
+            style={{fontSize: 24}}
             onClick={() => {
-              setRange([{ startDate: null, endDate: null, key: "selection" }]);
-              setShowCalendar(v => !v);
+              if (!isLoggedIn) {
+                onLoginOpen();
+                return;
+              }
+              if (country) {
+                const addData = {
+                  country,
+                  city: selectedCity?.city,
+                  lat: selectedCity?.lat,
+                  lon: selectedCity?.lon
+                };
+                console.log('여행지 추가:', addData);
+                onAdd(country, "", "", selectedCity?.city, selectedCity?.lat, selectedCity?.lon);
+              }
             }}
-            type="button"
-            style={compact ? {height: 32, fontSize: 15, padding: 0, border: 0} : {}}
+            aria-label="여행지 추가"
           >
-            {end ? end : "날짜 선택"}
+            +
           </button>
-          {end && !compact && (
-            <button
-              className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-500 text-lg ml-1"
-              onClick={() => setRange([{ ...range[0], endDate: null }])}
-              type="button"
-              tabIndex={-1}
-              aria-label="귀국일 초기화"
-            >
-              ×
-            </button>
-          )}
         </div>
       </div>
-      <button
-        className={`ml-4 rounded-full flex items-center justify-center text-white text-2xl shadow transition ${compact ? "w-8 h-8" : "w-12 h-12"}`}
-        style={compact ? {fontSize: 20, marginLeft: 8, backgroundColor: '#F57C00'} : {backgroundColor: '#F57C00'}}
-        onClick={() => {
-          if (country && start && end) onAdd(country, start, end);
-        }}
-        aria-label="여행지 추가"
-        onMouseOver={e => (e.currentTarget.style.backgroundColor = '#ff9800')}
-        onMouseOut={e => (e.currentTarget.style.backgroundColor = '#F57C00')}
-      >
-        +
-      </button>
     </div>
   );
 } 

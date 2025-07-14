@@ -7,9 +7,9 @@ interface LanguageOption {
 }
 
 const LANGUAGES: LanguageOption[] = [
-  { code: "ko", label: "한국어", region: "대한민국" },
   { code: "en", label: "English", region: "United States" },
   { code: "en-uk", label: "English", region: "United Kingdom" },
+  { code: "ko", label: "한국어", region: "대한민국" },
   { code: "ja", label: "日本語", region: "日本" },
   { code: "zh", label: "中文", region: "中国" },
   { code: "fr", label: "Français", region: "France" },
@@ -39,7 +39,7 @@ export default function LanguageModal({ open, onClose, selectedLanguage, setSele
         >
           ×
         </button>
-        <h2 className="text-2xl font-bold mb-6 text-black">언어와 지역을 선택하세요</h2>
+        <h2 className="text-2xl font-bold mb-6 text-black">Select your language and region</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {LANGUAGES.map(lang => (
             <button

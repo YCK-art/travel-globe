@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, setDoc, doc } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBzi9UlVNxwtXUtToIEPdXPxlAKUYbvA8s",
@@ -16,5 +17,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
+const storage = getStorage(app, "gs://travel-globe-dfcfc.firebasestorage.app");
 
-export { app, auth, provider, db, setDoc, doc }; 
+export { app, auth, provider, db, setDoc, doc, storage }; 

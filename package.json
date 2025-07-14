@@ -9,18 +9,29 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@headlessui/react": "^2.2.4",
+    "@hello-pangea/dnd": "^18.0.1",
     "@react-three/drei": "^10.5.0",
     "@react-three/fiber": "^9.2.0",
     "@types/three": "^0.178.1",
+    "d3-geo": "^3.1.1",
     "date-fns": "^4.1.0",
+    "dom-to-image": "^2.6.0",
     "firebase": "^11.10.0",
+    "html2canvas": "^1.4.1",
     "next": "15.3.5",
     "react": "^19.0.0",
     "react-date-range": "^2.0.1",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
+    "react-sortablejs": "^6.1.4",
+    "sortablejs": "^1.15.6",
     "three": "^0.178.0",
-    "three-globe": "^2.43.0"
+    "three-globe": "^2.43.0",
+    "topojson-client": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

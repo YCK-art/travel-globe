@@ -26,11 +26,13 @@ body {
 }
 
 /* react-date-range: 기간 선택 중 preview 하이라이트 숨기기 */
+/*
 .rdrDayInPreview {
   background: transparent !important;
 }
 
 /* 캘린더 hover 효과 제거 및 min-height 조정 */
+/*
 .rdrDayHovered, .rdrDayStartPreview, .rdrDayEndPreview, .rdrDayInPreview {
   background: none !important;
   box-shadow: none !important;
@@ -41,6 +43,7 @@ body {
 /* 선택된 날짜, 구간 등도 오렌지로 통일하려면 필요시 추가 커스텀 */
 
 /* === react-date-range 커스텀 === */
+/*
 .rdrCalendarWrapper .rdrMonthAndYearPickers select,
 .rdrCalendarWrapper .rdrNextButton, .rdrCalendarWrapper .rdrPprevButton {
   color: #F57C00 !important;
@@ -56,6 +59,7 @@ body {
   background: none !important;
 }
 /* 선택된 날짜(출국/귀국일) 오렌지, 구간은 연한 오렌지 */
+/*
 .rdrDayStartOfRange .rdrDayNumber span,
 .rdrDayEndOfRange .rdrDayNumber span {
   background: #F57C00 !important;
@@ -147,6 +151,7 @@ body {
 
 /* === react-date-range 완전 커스텀 === */
 /* 1. 모든 hover/preview/active/selected/오늘 효과 제거 및 오렌지 원형만 남기기 */
+/*
 .rdrDayHovered, .rdrDayStartPreview, .rdrDayEndPreview, .rdrDayInPreview,
 .rdrDayActive, .rdrDaySelected, .rdrDayStartEdge, .rdrDayEndEdge {
   background: none !important;
@@ -163,6 +168,7 @@ body {
   box-shadow: none !important;
 }
 /* 2. 적용 버튼을 캘린더 하단에 고정 */
+/*
 .rdrCalendarWrapper {
   min-height: 520px !important;
   display: flex !important;
@@ -173,21 +179,25 @@ body {
 /* 3. 오렌지 원형 강조는 기존대로 유지 */
 
 /* === react-date-range 상단 월/연도 드롭다운만 숨김 === */
+/*
 .rdrMonthAndYearPickers {
   display: none !important;
 }
 /* .rdrMonthName은 보이도록 유지 */
+/*
 .rdrMonthName {
   display: block !important;
 }
 
 /* 캘린더 높이/위치 고정 */
+/*
 .rdrCalendarWrapper {
   min-height: 520px !important;
   padding-bottom: 32px !important;
   position: relative;
 }
 /* === react-date-range 월별 달력 크기 확장 === */
+/*
 .rdrMonths {
   display: flex;
   gap: 32px;
@@ -200,11 +210,13 @@ body {
 }
 
 /* 넘기는 버튼 아래로 캘린더가 항상 같은 위치에 보이도록 */
+/*
 .rdrCalendarWrapper .rdrNextButton, .rdrCalendarWrapper .rdrPprevButton {
   margin-top: 0 !important;
 }
 
 /* 날짜 숫자 크기 적당히 확대 */
+/*
 .rdrDayNumber span {
   font-size: 1.12rem !important;
   font-weight: 600 !important;
@@ -217,15 +229,18 @@ body {
 }
 
 /* 요일(일~토) 크기 확대 */
+/*
 .rdrWeekDays span {
   font-size: 1.05rem !important;
   font-weight: 600 !important;
 }
 /* 연월(7월 2025 등) 크기 확대 */
+/*
 .rdrMonthName {
   font-size: 1.18rem !important;
   font-weight: 700 !important;
 }
+*/
 
 @font-face {
   font-family: 'Alkia';
@@ -235,4 +250,44 @@ body {
 }
 .font-alkia {
   font-family: 'Alkia', sans-serif !important;
+}
+
+@font-face {
+  font-family: 'BROmega-Regular-BF6556cee4dd400';
+  src: url('/fonts/BROmega-Regular-BF6556cee4dd400.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SamsungSans-Regular';
+  src: url('/fonts/SamsungSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SamsungSans-Bold';
+  src: url('/fonts/SamsungSans-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'UberMoveMedium';
+  src: url('/fonts/UberMoveMedium.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'UberMoveBold';
+  src: url('/fonts/UberMoveBold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
 }

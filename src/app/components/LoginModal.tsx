@@ -33,7 +33,7 @@ export default function LoginModal({ open, onClose, onLogin }: LoginModalProps) 
         <button
           className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-2xl text-gray-500"
           onClick={onClose}
-          aria-label="닫기"
+          aria-label="Close"
         >
           ×
         </button>
@@ -42,13 +42,14 @@ export default function LoginModal({ open, onClose, onLogin }: LoginModalProps) 
           <span className="text-5xl font-bold font-alkia text-black">Globr</span>
         </div>
         {/* 안내문구 */}
-        <h2 className="text-2xl font-bold mb-8 text-left text-[#173c2b] leading-snug">
-          로그인하여<br />당신만의 여정을 기록하세요
+        <h2 className="text-2xl font-bold mb-8 text-left text-[#173c2b] leading-snug" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>
+          Sign in to<br />record your own journey
         </h2>
         {/* 로그인 버튼들 */}
         <div className="flex flex-col gap-4 w-full mb-8">
           <button
             className="flex items-center justify-center gap-3 w-full border-2 border-[#173c2b] rounded-full py-3 text-lg font-semibold text-[#173c2b] hover:bg-[#f5f5f5] transition"
+            style={{fontFamily: 'SamsungSans-Bold, sans-serif'}}
             onClick={async () => {
               try {
                 const result = await signInWithPopup(auth, provider);
@@ -80,17 +81,17 @@ export default function LoginModal({ open, onClose, onLogin }: LoginModalProps) 
             }}
           >
             <Image src="/google-logo.webp" alt="Google" width={32} height={32} />
-            Google로 계속하기
+            Continue with Google
           </button>
-          <button className="flex items-center justify-center gap-3 w-full border-2 border-[#173c2b] rounded-full py-3 text-lg font-semibold text-[#173c2b] hover:bg-[#f5f5f5] transition">
+          <button className="flex items-center justify-center gap-3 w-full border-2 border-[#173c2b] rounded-full py-3 text-lg font-semibold text-[#173c2b] hover:bg-[#f5f5f5] transition" style={{fontFamily: 'SamsungSans-Bold, sans-serif'}}>
             <MdEmail size={24} color="#222" />
-            이메일로 계속하기
+            Continue with Email
           </button>
         </div>
         {/* 하단 안내문구 */}
-        <div className="text-xs text-gray-600 text-center leading-relaxed mt-4">
-          계속 진행할 경우, Globr의 <span className="underline">개인정보 취급방침</span> 및 <span className="underline">쿠키 정책</span>에 동의한 것으로 간주됩니다.<br />
-          이 사이트는 reCAPTCHA에 의해 보호되며 Google <span className="underline">개인정보 취급방침</span> 및 <span className="underline">이용 약관</span>이 적용됩니다.
+        <div className="text-xs text-gray-600 text-center leading-relaxed mt-4" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>
+          By continuing, you agree to Globr's <span className="underline">Privacy Policy</span> and <span className="underline">Cookie Policy</span>.<br />
+          This site is protected by reCAPTCHA and subject to Google's <span className="underline">Privacy Policy</span> and <span className="underline">Terms of Service</span>.
         </div>
       </div>
     </div>
