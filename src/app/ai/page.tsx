@@ -3,18 +3,13 @@ import React, { useState } from "react";
 import Toolbar from "../components/Toolbar";
 import SegmentControl from "../components/SegmentControl";
 import { useRouter } from "next/navigation";
-import { FiMenu, FiX, FiPlus, FiMessageSquare, FiLayout, FiUser, FiGrid, FiChevronLeft, FiChevronRight, FiArrowUp } from "react-icons/fi";
+import { FiPlus, FiMessageSquare, FiChevronLeft, FiChevronRight, FiArrowUp } from "react-icons/fi";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 export default function AISearchPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ uid: string; email: string | null; displayName: string | null; photoURL: string | null; providerId: string } | null>(null);
-  const [chats] = useState([
-    { id: 1, title: "Summer trip to Europe" },
-    { id: 2, title: "Best places in Asia" },
-  ]);
-  const [selectedChat, setSelectedChat] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   React.useEffect(() => {
@@ -74,7 +69,7 @@ export default function AISearchPage() {
           className={`fixed top-20 left-0 z-[10000] h-[calc(100vh-5rem)] bg-white border-r border-gray-200 flex flex-col justify-between transition-all duration-300 ${sidebarOpen ? "w-64" : "w-16"} shadow-lg`}
           style={{ pointerEvents: sidebarOpen ? 'auto' : 'auto' }}
         >
-          {/* 열기/닫기 버튼 (왼쪽 정렬, 작게) */}
+          {/* 열기/닫기 버튼 (왼쪽 상단, 크기 22px) */}
           <button
             className="hover:bg-[#fff3e0] transition-colors ml-2 mt-4 mb-2 flex items-center justify-center"
             onClick={() => setSidebarOpen(v => !v)}

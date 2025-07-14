@@ -138,12 +138,10 @@ function CameraFocus({ lat, lon }: { lat: number, lon: number }) {
 
 export default function GlobeComponent({ 
   visited = [], 
-  fullScreen = false,
   cities = [],
   focus
 }: { 
   visited?: Visited[], 
-  fullScreen?: boolean,
   cities?: City[],
   focus?: { lat: number, lon: number } | null
 }) {

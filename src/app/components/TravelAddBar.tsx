@@ -1,7 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { DateRange } from "react-date-range";
-import { ko } from "date-fns/locale";
+import React from "react";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
@@ -24,12 +22,8 @@ interface TravelAddBarProps {
 }
 
 export default function TravelAddBar({ onAdd, countryList, cities = [], compact = false, isLoggedIn, onLoginOpen }: TravelAddBarProps) {
-  const [country, setCountry] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [selectedCity, setSelectedCity] = useState<{city: string, lat: number, lon: number} | null>(null);
-  const [focused, setFocused] = useState<'where' | null>('where');
+  const [country, setCountry] = React.useState("");
+  const [showDropdown, setShowDropdown] = React.useState(false);
   const countryInputRef = React.useRef<HTMLInputElement>(null);
 
   // 입력값과 일치하는 국가명만 필터링
@@ -45,21 +39,10 @@ export default function TravelAddBar({ onAdd, countryList, cities = [], compact 
         }))
     : [];
 
-  // 날짜 포맷 함수 (UTC 문제 방지)
-  function formatDate(date: Date|null) {
-    if (!date) return "";
-    const y = date.getFullYear();
-    const m = (date.getMonth()+1).toString().padStart(2,'0');
-    const d = date.getDate().toString().padStart(2,'0');
-    return `${y}-${m}-${d}`;
-  }
-
   // 도시명 25자 초과시 ... 처리 함수
   function ellipsisCity(name: string) {
     return name.length > 25 ? name.slice(0, 25) + '...' : name;
   }
-
-  // 출국일, 귀국일 관련 상태, ref, 함수 제거
 
   // bar 높이 및 padding/slim 스타일 조정
   const barHeight = compact ? 'h-12' : 'h-16';

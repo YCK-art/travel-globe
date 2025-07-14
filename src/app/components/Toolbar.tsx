@@ -7,7 +7,6 @@ import LanguageModal from "./LanguageModal";
 import LoginModal, { getProfileInitial } from "./LoginModal";
 import { signOut } from "firebase/auth";
 import { auth } from "../../lib/firebase";
-import Image from "next/image";
 
 interface ToolbarProps {
   children?: ReactNode;

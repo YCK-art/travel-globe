@@ -90,8 +90,8 @@ export default function LoginModal({ open, onClose, onLogin }: LoginModalProps) 
         </div>
         {/* 하단 안내문구 */}
         <div className="text-xs text-gray-600 text-center leading-relaxed mt-4" style={{fontFamily: 'SamsungSans-Regular, sans-serif'}}>
-          By continuing, you agree to Globr's <span className="underline">Privacy Policy</span> and <span className="underline">Cookie Policy</span>.<br />
-          This site is protected by reCAPTCHA and subject to Google's <span className="underline">Privacy Policy</span> and <span className="underline">Terms of Service</span>.
+          By continuing, you agree to Globr&#39;s <span className="underline">Privacy Policy</span> and <span className="underline">Cookie Policy</span>.<br />
+          This site is protected by reCAPTCHA and subject to Google&#39;s <span className="underline">Privacy Policy</span> and <span className="underline">Terms of Service</span>.
         </div>
       </div>
     </div>
